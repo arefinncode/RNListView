@@ -1,56 +1,90 @@
-import React, { Component } from 'react';
-import { ListView } from 'react-native';
-import { Container, Header, Content, Button, Icon, List, ListItem, Text } from 'native-base';
-const datas = [
-    'Simon Mignolet',
-    'Nathaniel Clyne',
-    'Dejan Lovren',
-    'Mama Sakho',
-    'Alberto Moreno',
-    'Emre Can',
-    'Joe Allen',
-    'Phil Coutinho',
-];
-export default class SwipeableListExample extends Component {
-    constructor(props) {
-        super(props);
-        this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+import React from "react";
+import { FlatList } from "react-native";
+import { Text, ListItem, Left, Body, Icon, Right, Title } from "native-base";
+export default class App extends React.Component {
+    constructor() {
+        super();
         this.state = {
-            basic: true,
-            listViewData: datas,
+            data: [
+                { name: "Movies", header: true },
+                { name: "Interstellar", header: false },
+                { name: "Dark Knight", header: false },
+                { name: "Pop", header: false },
+                { name: "Pulp Fiction", header: false },
+                { name: "Burning Train", header: false },
+                { name: "Music", header: true },
+                { name: "Adams", header: false },
+                { name: "Nirvana", header: false },
+                { name: "Amrit Maan", header: false },
+                { name: "Oye Hoye", header: false },
+                { name: "Eminem", header: false },
+                { name: "Places", header: true },
+                { name: "Jordan", header: false },
+                { name: "Punjab", header: false },
+                { name: "Ludhiana", header: false },
+                { name: "Jamshedpur", header: false },
+                { name: "India", header: false },
+                { name: "People", header: true },
+                { name: "Jazzy", header: false },
+                { name: "Appie", header: false },
+                { name: "Baby", header: false },
+                { name: "Sunil", header: false },
+                { name: "Arrow", header: false },
+                { name: "Things", header: true },
+                { name: "table", header: false },
+                { name: "chair", header: false },
+                { name: "fan", header: false },
+                { name: "cup", header: false },
+                { name: "cube", header: false }
+            ],
+            stickyHeaderIndices: []
         };
     }
-    deleteRow(secId, rowId, rowMap) {
-        rowMap[`${secId}${rowId}`].props.closeRow();
-        const newData = [...this.state.listViewData];
-        newData.splice(rowId, 1);
-        this.setState({ listViewData: newData });
+    componentWillMount() {
+        var arr = [];
+        this.state.data.map(obj => {
+            if (obj.header) {
+                arr.push(this.state.data.indexOf(obj));
+                // true for all other cases.
+            }
+        });
+        arr.push(0);
+        // 0 for other cases
+        this.setState({
+            stickyHeaderIndices: arr
+        });
     }
+    renderItem = ({ item }) => {
+        if (item.header) {
+            return (
+                <ListItem itemDivider>
+                    <Left />
+                    <Body style={{ marginRight: 40 }}>
+                    <Text style={{ fontWeight: "bold" }}>
+                        {item.name}
+                    </Text>
+                    </Body>
+                    <Right />
+                </ListItem>
+            );
+        } else if (!item.header) {
+            return (
+                <ListItem style={{ marginLeft: 0 }}>
+                    <Body>
+                    <Text>{item.name}</Text>
+                    </Body>
+                </ListItem>
+            );
+        }
+    };
     render() {
-        const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
         return (
-            <Container>
-                <Header />
-                <Content>
-                    <List
-                        leftOpenValue={75}
-                        rightOpenValue={-75}
-                        dataSource={this.ds.cloneWithRows(this.state.listViewData)}
-                        renderRow={data =>
-                            <ListItem>
-                                <Text> {data} </Text>
-                            </ListItem>}
-                        renderLeftHiddenRow={data =>
-                            <Button full onPress={() => alert(data)}>
-                                <Icon active name="information-circle" />
-                            </Button>}
-                        renderRightHiddenRow={(data, secId, rowId, rowMap) =>
-                            <Button full danger onPress={_ => this.deleteRow(secId, rowId, rowMap)}>
-                                <Icon active name="trash" />
-                            </Button>}
-                    />
-                </Content>
-            </Container>
+            <FlatList
+                data={this.state.data}
+                renderItem={this.renderItem}
+                keyExtractor={item => item.name}
+                stickyHeaderIndices={this.state.stickyHeaderIndices}
+            />
         );
     }
 }
