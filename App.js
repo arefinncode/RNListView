@@ -55,7 +55,15 @@ export default class Application extends React.Component {
     }
     render() {
         if (!this.state.isReady) {
-            return <Expo.AppLoading />;
+            // return <Expo.AppLoading />;
+
+            return (
+                <AppLoading
+                    startAsync={this._cacheResourcesAsync}
+                    onFinish={() => this.setState({ isReady: true })}
+                    onError={console.warn}
+                />
+            );
         }
         return (
             <Container>
