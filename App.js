@@ -1,55 +1,74 @@
-import React, { Component } from 'react';
-import { ListView } from 'react-native';
-import { Container, Header, Content, Button, Icon, List, ListItem, Text } from 'native-base';
-const datas = [
-    'Simon Mignolet',
-    'Nathaniel Clyne',
-    'Dejan Lovren',
-    'Mama Sakho',
-    'Alberto Moreno',
-    'Emre Can',
-    'Joe Allen',
-    'Phil Coutinho',
-];
-export default class SwipeableListExample extends Component {
-    constructor(props) {
-        super(props);
-        this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-        this.state = {
-            basic: true,
-            listViewData: datas,
+import React from 'react';
+import Expo from 'expo';
+import { ListView, View } from 'react-native';
+import { List, ListItem, Container, Content, Header, Title, Body, Text } from 'native-base';
+export default class Application extends React.Component {
+    constructor(){
+        super();
+        this.state= {
+            isReady: false,
+            dataSource : new ListView.DataSource({
+                rowHasChanged           : (row1, row2) => row1 !== row2,
+                sectionHeaderHasChanged : (s1, s2) => s1 !== s2
+            })
         };
     }
-    deleteRow(secId, rowId, rowMap) {
-        rowMap[`${secId}${rowId}`].props.closeRow();
-        const newData = [...this.state.listViewData];
-        newData.splice(rowId, 1);
-        this.setState({ listViewData: newData });
+    populateList() {
+        this.setState({
+            dataSource : this.state.dataSource.cloneWithRowsAndSections([
+                ["Movies","Prestige","Interstellar","Dark Knight", "Neighbours"],
+                ["Music","Nirvana", "Imagine Dragons", "Avicii","Maya"],
+                ["Places","Agra","Jamshedpur","Delhi", "Bangalore"],
+                ["Things","Car","Table","Fan", "Chair"],
+                ["People","Sankho","Aditya","Himanshu", "Kuldeep"],
+                ["Roads","NH-11","MG Road","Brigade Road", "Nehru Road"],
+                ["Buildings","Empire State","Burj Khalifa","Caspian", "Narnia"]
+            ])
+        });
+    }
+    async componentWillMount() {
+        this.populateList();
+        await Expo.Font.loadAsync({
+            'Roboto': require('native-base/Fonts/Roboto.ttf'),
+            'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf'),
+        });
+        this.setState({isReady: true});
+    }
+    renderSectionHeader(sectionData, sectionID) {
+        return (
+            <ListItem >
+                <Text>{sectionData[0]}</Text>
+            </ListItem>
+        );
+    }
+    renderRow(rowData, sectionID, rowID) {
+        console.log(rowID,rowData,sectionID, "renderRow");
+        if(rowID == 0){
+            console.log(rowData, "0 rowId");
+            return null;
+        }
+        return (
+            <ListItem>
+                <Text>{rowData}</Text>
+            </ListItem>
+        );
     }
     render() {
-        const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+        if (!this.state.isReady) {
+            return <Expo.AppLoading />;
+        }
         return (
             <Container>
-                <Header />
-                <Content>
-                    <List
-                        leftOpenValue={75}
-                        rightOpenValue={-75}
-                        dataSource={this.ds.cloneWithRows(this.state.listViewData)}
-                        renderRow={data =>
-                            <ListItem>
-                                <Text> {data} </Text>
-                            </ListItem>}
-                        renderLeftHiddenRow={data =>
-                            <Button full onPress={() => alert(data)}>
-                                <Icon active name="information-circle" />
-                            </Button>}
-                        renderRightHiddenRow={(data, secId, rowId, rowMap) =>
-                            <Button full danger onPress={_ => this.deleteRow(secId, rowId, rowMap)}>
-                                <Icon active name="trash" />
-                            </Button>}
-                    />
-                </Content>
+                <Header>
+                    <Body>
+                    <Title>Sticky Headers</Title>
+                    </Body>
+                </Header>
+                <List
+                    dataSource={this.state.dataSource}
+                    renderRow={this.renderRow}
+                    renderSectionHeader={this.renderSectionHeader}
+                />
             </Container>
         );
     }
